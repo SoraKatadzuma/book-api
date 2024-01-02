@@ -38,11 +38,9 @@ CREATE TABLE IF NOT EXISTS library.author_book(
 );
 
 CREATE TABLE IF NOT EXISTS library.author_pseudonym(
-    appk_mapping_id BIGINT        NOT NULL AUTO_INCREMENT UNIQUE,
     apfk_author_id  BIGINT        NOT NULL,
     apvc_pseudonym  VARCHAR(1024) NOT NULL,
 
-    PRIMARY KEY(appk_mapping_id),
     FOREIGN KEY(apfk_author_id) REFERENCES library.author(author_id)
 );
 
@@ -52,7 +50,7 @@ CREATE TABLE IF NOT EXISTS library.book_publication(
     bpti_edition      TINYINT NOT NULL,
     bpdt_copyright    DATE    NOT NULL,
 
-    PRIMARY KEY(bpfk_book_id, bpfk_publisher_id),
+    -- PRIMARY KEY(bpfk_book_id, bpfk_publisher_id),
     FOREIGN KEY(bpfk_book_id)      REFERENCES library.book(book_id),
     FOREIGN KEY(bpfk_publisher_id) REFERENCES library.publisher(publisher_id)
 );

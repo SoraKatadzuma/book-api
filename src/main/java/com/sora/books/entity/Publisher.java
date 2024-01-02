@@ -2,7 +2,7 @@ package com.sora.books.entity;
 
 import java.io.Serializable;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.sora.books.transfer.PublisherDTO;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -17,14 +17,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.Accessors;
-import lombok.extern.jackson.Jacksonized;
 
 
 @Data
 @Entity
 @Builder
 @ToString
-@Jacksonized
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(fluent = true)
@@ -36,7 +34,6 @@ import lombok.extern.jackson.Jacksonized;
 })
 public final class Publisher implements Serializable {
     @Id
-    @JsonSerialize
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name     = "publisher_id",
             unique   = true,
@@ -44,7 +41,6 @@ public final class Publisher implements Serializable {
     private Long id;
 
 
-    @JsonSerialize
     @Column(name     = "publisher_name",
             unique   = true,
             nullable = false,
@@ -52,10 +48,27 @@ public final class Publisher implements Serializable {
     private String name;
 
 
-    @JsonSerialize
     @Column(name     = "publisher_locale",
             unique   = false,
             nullable = false,
             length   = 2)
     private String locale;
+
+
+    public static Publisher fromDTO(PublisherDTO dto) {
+        return Publisher.builder()
+            .id(dto.getId())
+            .name(dto.getName())
+            .locale(dto.getLocale())
+            .build();
+    }
+
+    
+    public static PublisherDTO toDTO(Publisher publisher) {
+        return PublisherDTO.builder()
+            .id(publisher.id())
+            .name(publisher.name())
+            .locale(publisher.locale())
+            .build();
+    }
 }

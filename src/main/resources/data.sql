@@ -1,3 +1,4 @@
+-- For some reason, 
 INSERT INTO library.author (
     author_id,
     author_full_name,
@@ -31,16 +32,14 @@ INSERT INTO library.author_book (
 ) VALUES (0, 0, 0);
 
 INSERT INTO library.author_pseudonym (
-    appk_mapping_id,
     apfk_author_id,
     apvc_pseudonym
-) VALUES (0, 0, 'L.A.V.');
+) VALUES (0, 'L.A.V.');
 
 INSERT INTO library.author_pseudonym (
-    appk_mapping_id,
     apfk_author_id,
     apvc_pseudonym
-) VALUES (1, 0, 'Salvator R. Tarnmoor');
+) VALUES (0, 'Salvator R. Tarnmoor');
 
 INSERT INTO library.book_publication (
     bpfk_book_id,

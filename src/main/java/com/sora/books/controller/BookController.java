@@ -1,9 +1,8 @@
 package com.sora.books.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.sora.books.entity.Book;
 import com.sora.books.service.BookService;
-import com.sora.books.transfer.BookInformation;
+import com.sora.books.transfer.BookDTO;
 
 import lombok.AllArgsConstructor;
 
@@ -30,7 +29,7 @@ public final class BookController {
     private BookService _bookService;
 
     @PostMapping("/book")
-    public ResponseEntity<Book> create(@RequestBody BookInformation input)
+    public ResponseEntity<BookDTO> create(@RequestBody BookDTO input)
         throws URISyntaxException
     {
         var book = _bookService.create(input);
@@ -40,7 +39,7 @@ public final class BookController {
         var uri = ServletUriComponentsBuilder
             .fromCurrentRequest()
             .path("/{id}")
-            .buildAndExpand(book.id())
+            .buildAndExpand(book.getId())
             .toUri();
 
         return ResponseEntity
@@ -49,17 +48,20 @@ public final class BookController {
     }
 
     @GetMapping("/book/{id}")
-    public ResponseEntity<Book> read(@PathVariable("id") Long bookId)
+    public ResponseEntity<BookDTO> read(@PathVariable("id") Long bookId)
         throws JsonProcessingException
     {
         var book = _bookService.read(bookId);
-        return book != null ? ResponseEntity.ok(book)
-                            : ResponseEntity.notFound().build();
+        return book == null
+            ? ResponseEntity.notFound().build()
+            : book.isDeleted()
+                ? ResponseEntity.noContent().build()
+                : ResponseEntity.ok(book);
     }
 
     @PutMapping("/book/{id}")
-    public ResponseEntity<Book> update(@PathVariable("id") Long bookId,
-                                       @RequestBody BookInformation updated) {
+    public ResponseEntity<BookDTO> update(@PathVariable("id") Long bookId,
+                                          @RequestBody BookDTO updated) {
         var book = _bookService.update(bookId, updated);
         return book != null ? ResponseEntity.ok(book)
                             : ResponseEntity.notFound().build();

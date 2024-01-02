@@ -2,12 +2,14 @@ package com.sora.books.entity;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.sora.books.transfer.BookDTO;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -19,20 +21,23 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
-import lombok.extern.jackson.Jacksonized;
 
 
 @Data
 @Entity
 @Builder
 @ToString
-@Jacksonized
+@EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(fluent = true)
@@ -43,7 +48,6 @@ import lombok.extern.jackson.Jacksonized;
 })
 public class Book implements Serializable {
     @Id
-    @JsonSerialize
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name     = "book_id",
             unique   = true, 
@@ -51,7 +55,6 @@ public class Book implements Serializable {
     private Long id;
 
 
-    @JsonSerialize
     @Column(name     = "book_name",
             unique   = false,
             nullable = false,
@@ -59,43 +62,114 @@ public class Book implements Serializable {
     private String name;
 
 
-    @JsonSerialize
-    @JsonFormat(shape   = JsonFormat.Shape.STRING,
-                pattern = "yyyy-MM-dd hh:mm:ss")
     @Column(name     = "book_added",
             unique   = false,
             nullable = false)
     private LocalDateTime added;
 
 
-    @JsonSerialize
-    @JsonFormat(shape   = JsonFormat.Shape.STRING,
-                pattern = "yyyy-MM-dd hh:mm:ss")
     @Column(name     = "book_deleted",
             unique   = false,
             nullable = true)
     private LocalDateTime deleted;
 
 
-    @JsonSerialize
-    @ManyToMany
+    @Builder.Default
+    @Getter(value = AccessLevel.NONE)
+    @Setter(value = AccessLevel.NONE)
+    @ManyToMany(cascade = {
+        CascadeType.PERSIST,
+        CascadeType.MERGE
+    })
     @JoinTable(name               = "author_book",
                schema             = "library",
                joinColumns        = @JoinColumn(name = "abfk_book_id"),
                inverseJoinColumns = @JoinColumn(name = "abfk_author_id"))
-    private List<Author> authors;
+    private Set<Author> authors = new HashSet<>();
 
     
-    @JsonSerialize
-    @OneToMany(mappedBy = "book")
-//     @JoinTable(name               = "book_publication",
-//                schema             = "library",
-//                joinColumns        = { @JoinColumn(name = "bpfk_book_id"),
-//                                       @JoinColumn(name = "bpfk_publisher_id") },
-//                inverseJoinColumns = @JoinColumn(name = "bppk_mapping_id"))
-    private List<Publication> publications;
+//     @JsonSerialize
+//     @Builder.Default
+//     @Getter(value = AccessLevel.NONE)
+//     @Setter(value = AccessLevel.NONE)
+//     @OneToMany(mappedBy      = "book",
+//                orphanRemoval = true,
+//                cascade       = {
+//         CascadeType.PERSIST,
+//         CascadeType.MERGE
+//     })
+//     private Set<Publication> publications = new HashSet<>();
 
 
     @JsonIgnore
     public boolean isDeleted() { return deleted != null; }
+
+
+    public static Book fromDTO(BookDTO dto) {
+        var remappedAuthors =
+            dto.getAuthors()
+               .stream()
+               .map(Author::fromDTO)
+               .collect(Collectors.toSet());
+
+        // var remappedPublications =
+        //     dto.getPublications()
+        //        .stream()
+        //        .map(Publication::fromDTO)
+        //        .collect(Collectors.toSet());
+
+        return Book.builder()
+            .id(dto.getId())
+            .name(dto.getName())
+            .added(dto.getAdded())
+            .deleted(dto.getDeleted())
+            .authors(remappedAuthors)
+        //     .publications(remappedPublications)
+            .build();
+    }
+
+
+    public static BookDTO toDTO(Book book) {
+        var remappedAuthors =
+            book.authors()
+                .stream()
+                .map(Author::toDTO)
+                .collect(Collectors.toSet());
+
+        // var remappedPublications =
+        //     book.publications()
+        //         .stream()
+        //         .map(Publication::toDTO)
+        //         .collect(Collectors.toSet());
+
+        return BookDTO.builder()
+            .id(book.id())
+            .name(book.name())
+            .added(book.added())
+            .deleted(book.deleted())
+            .authors(remappedAuthors)
+        //     .publications(remappedPublications)
+            .build();
+    }
+
+
+    public Set<Author> authors() {
+        return authors;
+    }
+
+//     public Set<Publication> publications() {
+//         return publications;
+//     }
+
+    public void authors(Set<Author> newAuthors) {
+        authors.clear();
+        if (newAuthors != null)
+            authors.addAll(newAuthors);
+    }
+
+//     public void publications(Set<Publication> newPublications) {
+//         publications.clear();
+//         if (newPublications != null)
+//             publications.addAll(newPublications);
+//     }
 }

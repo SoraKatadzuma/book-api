@@ -2,9 +2,10 @@ package com.sora.books.entity;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.sora.books.transfer.AuthorDTO;
 
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
@@ -14,21 +15,25 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
-import lombok.extern.jackson.Jacksonized;
 
 @Data
 @Entity
 @Builder
 @ToString
-@Jacksonized
+@EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
 @Accessors(fluent = true)
@@ -39,7 +44,6 @@ import lombok.extern.jackson.Jacksonized;
 })
 public class Author implements Serializable {
     @Id
-    @JsonSerialize
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name     = "author_id",
             unique   = true,
@@ -47,7 +51,6 @@ public class Author implements Serializable {
     private Long id;
 
 
-    @JsonSerialize
     @Column(name     = "author_full_name",
             unique   = false,
             nullable = true,
@@ -55,21 +58,21 @@ public class Author implements Serializable {
     private String fullName;
 
 
-    @JsonSerialize
     @Column(name     = "author_date_of_birth",
             unique   = false,
             nullable = true)
     private LocalDate dateOfBirth;
 
 
-    @JsonSerialize
     @Column(name     = "author_date_of_death",
             unique   = false,
             nullable = true)
     private LocalDate dateOfDeath;
 
 
-    @JsonSerialize
+    @Builder.Default
+    @Getter(value = AccessLevel.NONE)
+    @Setter(value = AccessLevel.NONE)
     @ElementCollection
     @CollectionTable(name   = "author_pseudonym",
                      schema = "library",
@@ -77,5 +80,55 @@ public class Author implements Serializable {
         @JoinColumn(name = "apfk_author_id")
     })
     @Column(name = "apvc_pseudonym")
-    private List<String> pseudonyms;
+    private Set<String> pseudonyms = new HashSet<>();
+
+    @Builder.Default
+    @Getter(value = AccessLevel.NONE)
+    @Setter(value = AccessLevel.NONE)
+    @EqualsAndHashCode.Exclude
+    @ManyToMany(mappedBy = "authors")
+    private Set<Book> books = new HashSet<>();
+
+
+    public static Author fromDTO(AuthorDTO dto) {
+        return Author.builder()
+            .id(dto.getId())
+            .fullName(dto.getFullName())
+            .dateOfBirth(dto.getDateOfBirth())
+            .dateOfDeath(dto.getDateOfDeath())
+            .pseudonyms(dto.getPseudonyms())
+            .build();
+    }
+
+
+    public static AuthorDTO toDTO(Author author) {
+        return AuthorDTO.builder()
+            .id(author.id())
+            .fullName(author.fullName())
+            .dateOfBirth(author.dateOfBirth())
+            .dateOfDeath(author.dateOfDeath())
+            .pseudonyms(author.pseudonyms())
+            .build();
+    }
+
+
+    public Set<String> pseudonyms() {
+        return pseudonyms;
+    }
+
+    public Set<Book> books() {
+        return books;
+    }
+
+    public void pseudonyms(Set<String> newPseudonyms) {
+        pseudonyms.clear();
+        if (newPseudonyms != null)
+            pseudonyms.addAll(newPseudonyms);
+    }
+
+    public void books(Set<Book> newBooks) {
+        books.clear();
+        if (newBooks != null)
+            books.addAll(newBooks);
+    }
 }
