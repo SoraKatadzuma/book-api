@@ -5,10 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +14,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.event.annotation.BeforeTestClass;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -34,13 +31,6 @@ import com.sora.books.transfer.PublisherDTO;
 @TestPropertySource(locations = "classpath:application-test.properties")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 class BooksApplicationTests {
-	static LocalDate authorDateOfBirth;
-    static LocalDate authorDateOfDeath;
-    static LocalDateTime bookDateAdded;
-	static LocalDate publicationCopyright;
-    static Set<String> authorPseudonyms;
-
-
 	@Autowired
 	MockMvc mvc;
 
@@ -49,15 +39,6 @@ class BooksApplicationTests {
 
 	@Autowired
 	ObjectMapper objectMapper;
-
-	@BeforeTestClass
-	void oneTimeSetup() {
-		authorDateOfBirth = LocalDate.of(1998, 1, 16);
-        authorDateOfDeath = LocalDate.of(2069, 5, 25);
-        authorPseudonyms  = new HashSet<>(Arrays.asList("SoraKatadzuma", "VellaSpring"));
-        publicationCopyright = LocalDate.of(2030, 8, 12);
-        bookDateAdded = LocalDateTime.now();
-	}
 
 	@Test
 	void test_ContextLoads() throws Exception {
@@ -73,15 +54,15 @@ class BooksApplicationTests {
 			
 		var author = AuthorDTO.builder()
 			.fullName("John Christman")
-            .dateOfBirth(authorDateOfBirth)
-            .dateOfDeath(authorDateOfDeath)
-            .pseudonyms(authorPseudonyms)
+            .dateOfBirth(LocalDate.of(1998, 1, 16))
+            .dateOfDeath(LocalDate.of(2069, 5, 25))
+            .pseudonyms(new HashSet<>(Arrays.asList("SoraKatadzuma", "VellaSpring")))
             .build();
 
 		var publication = PublicationDTO.builder()
 			.publisher(publisher)
 			.edition(1l)
-			.copyright(publicationCopyright)
+			.copyright(LocalDate.of(2030, 8, 12))
 			.build();
 
 		var bookDto = BookDTO.builder()
@@ -228,9 +209,9 @@ class BooksApplicationTests {
 	void test_UpdateBookAuthor() throws Exception {
 		var author = AuthorDTO.builder()
 			.fullName("John Christman")
-            .dateOfBirth(authorDateOfBirth)
-            .dateOfDeath(authorDateOfDeath)
-            .pseudonyms(authorPseudonyms)
+            .dateOfBirth(LocalDate.of(1998, 1, 16))
+            .dateOfDeath(LocalDate.of(2069, 5, 25))
+            .pseudonyms(new HashSet<>(Arrays.asList("SoraKatadzuma", "VellaSpring")))
             .build();
 
 		var bookDto = BookDTO.builder()
@@ -260,6 +241,9 @@ class BooksApplicationTests {
 		assertEquals("John Christman", authors[0].getFullName());
 		assertEquals("1998-01-16", authors[0].getDateOfBirth().toString());
 		assertEquals("2069-05-25", authors[0].getDateOfDeath().toString());
+
+		var pseudonyms = new HashSet<>(Arrays.asList("SoraKatadzuma", "VellaSpring"));
+		assertEquals(pseudonyms, authors[0].getPseudonyms());
 	}
 
 	// @Test
