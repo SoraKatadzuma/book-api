@@ -3,11 +3,12 @@ package com.sora.books.service;
 import com.sora.books.entity.Author;
 import com.sora.books.entity.Book;
 import com.sora.books.entity.Publication;
-import com.sora.books.entity.PublicationKey;
+import com.sora.books.entity.Publisher;
 import com.sora.books.repository.BookRepository;
 import com.sora.books.transfer.BookDTO;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
@@ -35,6 +36,15 @@ public final class BookService {
         var book = Book.fromDTO(input);
         book.added(LocalDateTime.now());
         return Book.toDTO(_bookRepository.save(book));
+    }
+
+
+    public List<BookDTO> readAll() {
+        var books = _bookRepository.findAll();
+        return books
+            .stream()
+            .map(Book::toDTO)
+            .collect(Collectors.toList());
     }
 
 
@@ -72,18 +82,18 @@ public final class BookService {
                 author.books().add(toUpdate);
         }
 
-        // if (updated.getPublications() != null) {
-        //     var remappedPublications =
-        //         updated.getPublications()
-        //                .stream()
-        //                .map(Publication::fromDTO)
-        //                .collect(Collectors.toSet());
-        //     toUpdate.publications(remappedPublications);
-        //     for (var publication : toUpdate.publications()) {
-        //         publication.publicationKey()
-        //                    .setBook(toUpdate);
-        //     }
-        // }
+        if (updated.getPublications() != null) {
+            var remappedPublications =
+                updated.getPublications()
+                       .stream()
+                       .map(Publication::fromDTO)
+                       .collect(Collectors.toSet());
+            toUpdate.publications(remappedPublications);
+            for (var publication : toUpdate.publications()) {
+                publication.publicationKey()
+                           .setBook(toUpdate);
+            }
+        }
 
     
         return Book.toDTO(_bookRepository.save(toUpdate));

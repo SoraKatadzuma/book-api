@@ -43,9 +43,10 @@ public final class Publication implements Serializable {
     //         nullable = false)
     // private Long id;
 
+    @Builder.Default
     @EqualsAndHashCode.Exclude
     @EmbeddedId
-    private PublicationKey publicationKey;
+    private PublicationKey publicationKey = new PublicationKey();
 
 
     // @EqualsAndHashCode.Exclude

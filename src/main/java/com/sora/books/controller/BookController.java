@@ -7,9 +7,9 @@ import com.sora.books.transfer.BookDTO;
 import lombok.AllArgsConstructor;
 
 import java.net.URISyntaxException;
+import java.util.List;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,7 +23,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @AllArgsConstructor
 @RestController
-@CrossOrigin("*")
 @RequestMapping("api/v1")
 public final class BookController {
     private BookService _bookService;
@@ -45,6 +44,11 @@ public final class BookController {
         return ResponseEntity
             .created(uri)
             .body(book);
+    }
+
+    @GetMapping("/book")
+    public ResponseEntity<List<BookDTO>> readAll() {
+        return ResponseEntity.ok(_bookService.readAll());
     }
 
     @GetMapping("/book/{id}")

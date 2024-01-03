@@ -12,6 +12,7 @@ import com.sora.books.transfer.BookDTO;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -100,6 +101,17 @@ public class Book implements Serializable {
 //     })
 //     private Set<Publication> publications = new HashSet<>();
 
+    @Builder.Default
+    @Getter(value = AccessLevel.NONE)
+    @Setter(value = AccessLevel.NONE)
+    @OneToMany(orphanRemoval = true,
+               cascade       = {
+        CascadeType.PERSIST,
+        CascadeType.MERGE
+    })
+    @JoinColumn(name = "bpfk_book_id", foreignKey = @ForeignKey(name = "bpfk_book_id"))
+    private Set<Publication> publications = new HashSet<>();
+
 
     @JsonIgnore
     public boolean isDeleted() { return deleted != null; }
@@ -112,11 +124,11 @@ public class Book implements Serializable {
                .map(Author::fromDTO)
                .collect(Collectors.toSet());
 
-        // var remappedPublications =
-        //     dto.getPublications()
-        //        .stream()
-        //        .map(Publication::fromDTO)
-        //        .collect(Collectors.toSet());
+        var remappedPublications =
+            dto.getPublications()
+               .stream()
+               .map(Publication::fromDTO)
+               .collect(Collectors.toSet());
 
         return Book.builder()
             .id(dto.getId())
@@ -124,7 +136,7 @@ public class Book implements Serializable {
             .added(dto.getAdded())
             .deleted(dto.getDeleted())
             .authors(remappedAuthors)
-        //     .publications(remappedPublications)
+            .publications(remappedPublications)
             .build();
     }
 
@@ -136,11 +148,11 @@ public class Book implements Serializable {
                 .map(Author::toDTO)
                 .collect(Collectors.toSet());
 
-        // var remappedPublications =
-        //     book.publications()
-        //         .stream()
-        //         .map(Publication::toDTO)
-        //         .collect(Collectors.toSet());
+        var remappedPublications =
+            book.publications()
+                .stream()
+                .map(Publication::toDTO)
+                .collect(Collectors.toSet());
 
         return BookDTO.builder()
             .id(book.id())
@@ -148,7 +160,7 @@ public class Book implements Serializable {
             .added(book.added())
             .deleted(book.deleted())
             .authors(remappedAuthors)
-        //     .publications(remappedPublications)
+            .publications(remappedPublications)
             .build();
     }
 
@@ -157,9 +169,9 @@ public class Book implements Serializable {
         return authors;
     }
 
-//     public Set<Publication> publications() {
-//         return publications;
-//     }
+    public Set<Publication> publications() {
+        return publications;
+    }
 
     public void authors(Set<Author> newAuthors) {
         authors.clear();
@@ -167,9 +179,9 @@ public class Book implements Serializable {
             authors.addAll(newAuthors);
     }
 
-//     public void publications(Set<Publication> newPublications) {
-//         publications.clear();
-//         if (newPublications != null)
-//             publications.addAll(newPublications);
-//     }
+    public void publications(Set<Publication> newPublications) {
+        publications.clear();
+        if (newPublications != null)
+            publications.addAll(newPublications);
+    }
 }
