@@ -92,3 +92,10 @@ INSERT INTO library.book_publication (
     bpti_edition,
     bpdt_copyright
 ) VALUES (1, 2, 1, '1813-01-28');
+
+
+-- Need to do this to avoid primary key issues later.
+ALTER TABLE library.author ALTER COLUMN author_id RESTART WITH 2;
+ALTER TABLE library.book ALTER COLUMN book_id RESTART WITH 2;
+ALTER TABLE library.publisher ALTER COLUMN publisher_id RESTART WITH 3;
+ALTER TABLE library.author_book ALTER COLUMN abpk_mapping_id RESTART WITH 2;

@@ -12,7 +12,6 @@ import com.sora.books.transfer.BookDTO;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -88,28 +87,15 @@ public class Book implements Serializable {
                inverseJoinColumns = @JoinColumn(name = "abfk_author_id"))
     private Set<Author> authors = new HashSet<>();
 
-    
-//     @JsonSerialize
-//     @Builder.Default
-//     @Getter(value = AccessLevel.NONE)
-//     @Setter(value = AccessLevel.NONE)
-//     @OneToMany(mappedBy      = "book",
-//                orphanRemoval = true,
-//                cascade       = {
-//         CascadeType.PERSIST,
-//         CascadeType.MERGE
-//     })
-//     private Set<Publication> publications = new HashSet<>();
-
     @Builder.Default
     @Getter(value = AccessLevel.NONE)
     @Setter(value = AccessLevel.NONE)
-    @OneToMany(orphanRemoval = true,
+    @OneToMany(mappedBy      = "book",
+               orphanRemoval = true,
                cascade       = {
         CascadeType.PERSIST,
         CascadeType.MERGE
     })
-    @JoinColumn(name = "bpfk_book_id", foreignKey = @ForeignKey(name = "bpfk_book_id"))
     private Set<Publication> publications = new HashSet<>();
 
 

@@ -1,20 +1,27 @@
 package com.sora.books.entity;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.sora.books.transfer.PublisherDTO;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 
@@ -53,6 +60,18 @@ public final class Publisher implements Serializable {
             nullable = false,
             length   = 2)
     private String locale;
+
+
+    @Builder.Default
+    @Getter(value = AccessLevel.NONE)
+    @Setter(value = AccessLevel.NONE)
+    @OneToMany(mappedBy      = "publisher",
+               orphanRemoval = true,
+               cascade       = {
+        CascadeType.PERSIST,
+        CascadeType.MERGE
+    })
+    private Set<Publication> publications = new HashSet<>();
 
 
     public static Publisher fromDTO(PublisherDTO dto) {

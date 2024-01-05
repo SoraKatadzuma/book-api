@@ -3,9 +3,10 @@ package com.sora.books.service;
 import com.sora.books.entity.Author;
 import com.sora.books.entity.Book;
 import com.sora.books.entity.Publication;
-import com.sora.books.entity.Publisher;
 import com.sora.books.repository.BookRepository;
 import com.sora.books.transfer.BookDTO;
+
+import jakarta.transaction.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,7 +18,8 @@ import org.springframework.stereotype.Service;
 
 
 @Service
-public final class BookService {
+@Transactional
+public class BookService {
     @Autowired
     private BookRepository _bookRepository;
 
@@ -35,6 +37,9 @@ public final class BookService {
         
         var book = Book.fromDTO(input);
         book.added(LocalDateTime.now());
+        for (var publication : book.publications())
+            publication.book(book);
+
         return Book.toDTO(_bookRepository.save(book));
     }
 
@@ -90,12 +95,13 @@ public final class BookService {
                        .collect(Collectors.toSet());
             toUpdate.publications(remappedPublications);
             for (var publication : toUpdate.publications()) {
-                publication.publicationKey()
-                           .setBook(toUpdate);
+                // Have to update key in order for this to work.
+                publication.publicationKey().setBookId(toUpdate.id());
+                publication.publicationKey().setPublisherId(publication.publisher().id());
+                publication.book(toUpdate);
             }
         }
 
-    
         return Book.toDTO(_bookRepository.save(toUpdate));
     }
 

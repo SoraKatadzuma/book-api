@@ -3,11 +3,16 @@ package com.sora.books.entity;
 import java.io.Serializable;
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.sora.books.transfer.PublicationDTO;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.MapsId;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
@@ -49,19 +54,19 @@ public final class Publication implements Serializable {
     private PublicationKey publicationKey = new PublicationKey();
 
 
-    // @EqualsAndHashCode.Exclude
-    // @MapsId("bookId")
-    // @ManyToOne(cascade = CascadeType.MERGE)
-    // @JoinColumn(name = "bpfk_book_id")
-    // private Book book;
+    @EqualsAndHashCode.Exclude
+    @MapsId("bookId")
+    @ManyToOne(cascade = CascadeType.MERGE)
+    @JoinColumn(name = "bpfk_book_id")
+    private Book book;
 
 
-    // @JsonSerialize
-    // @EqualsAndHashCode.Exclude
-    // @MapsId("publisherId")
-    // @ManyToOne(cascade = CascadeType.MERGE)
-    // @JoinColumn(name = "bpfk_publisher_id")
-    // private Publisher publisher;
+    @JsonSerialize
+    @EqualsAndHashCode.Exclude
+    @MapsId("publisherId")
+    @ManyToOne(cascade = CascadeType.MERGE)
+    @JoinColumn(name = "bpfk_publisher_id")
+    private Publisher publisher;
 
 
     @Column(name     = "bpti_edition",
@@ -83,13 +88,13 @@ public final class Publication implements Serializable {
             .build();
 
         var remappedPublisher = Publisher.fromDTO(dto.getPublisher());
-        result.publicationKey.setPublisher(remappedPublisher);
+        result.publisher(remappedPublisher);
         return result;
     }
 
     
     public static PublicationDTO toDTO(Publication publication) {
-        var publisher = publication.publicationKey.getPublisher();
+        var publisher = publication.publisher();
         return PublicationDTO.builder()
             .publisher(Publisher.toDTO(publisher))
             .edition(publication.edition())
